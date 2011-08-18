@@ -7,6 +7,7 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.apache.log4j.Logger;
+import org.tsaikd.java.utils.ClassUtils;
 import org.tsaikd.java.utils.ConfigUtils;
 
 public class ConsoleUtil {
@@ -42,7 +43,7 @@ public class ConsoleUtil {
 		CommandLine cmd = parser.parse(options, args);
 
 		if (cmd.hasOption("h")) {
-			new HelpFormatter().printHelp("PatentClassMakeIndex", "Version: "
+			new HelpFormatter().printHelp(ClassUtils.getClassName(), "Version: "
 					+ version, options, null, true);
 			System.exit(0);
 			return;
