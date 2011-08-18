@@ -44,6 +44,7 @@ public class ConsoleUtil {
 		if (cmd.hasOption("h")) {
 			new HelpFormatter().printHelp("PatentClassMakeIndex", "Version: "
 					+ version, options, null, true);
+			System.exit(0);
 			return;
 		}
 
