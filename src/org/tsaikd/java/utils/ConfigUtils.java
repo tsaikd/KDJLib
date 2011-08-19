@@ -16,7 +16,7 @@ public class ConfigUtils {
 		Properties property = confs.get(resPath);
 		if (property == null) {
 			property = new Properties();
-			InputStream in = ConfigUtils.class.getResourceAsStream(resPath);
+			InputStream in = Thread.currentThread().getClass().getResourceAsStream(resPath);
 			property.load(in);
 			in.close();
 		}
@@ -28,7 +28,7 @@ public class ConfigUtils {
 	}
 
 	public static void set(final String key, final String value) throws Exception {
-		getInstance().setProperty(key, value);
+		System.setProperty(key, value);
 	}
 
 	public static String get(final String key, final String defaultValue) throws Exception {
