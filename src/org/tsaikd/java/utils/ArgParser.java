@@ -1,21 +1,25 @@
 package org.tsaikd.java.utils;
 
+import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class ArgParser {
 
-	static Logger log = Logger.getLogger(ArgParser.class);
-	public String version = "1.0";
+	static Log log = LogFactory.getLog(ArgParser.class);
+	String version = "1.0";
 	Collection<Option> opts = new LinkedList<ArgParser.Option>();
+	Collection<Class<?>> optcSet = new HashSet<Class<?>>();
 	CommandLine cmd = null;
-	private int helpWidth = 80;
+	int helpWidth = 80;
 
 	static public class Option {
 		String opt = null;
@@ -58,21 +62,117 @@ public class ArgParser {
 
 	}
 
-	public ArgParser() {
-		this.opts.add(new Option("h", "help", "Show help message"));
+	public ArgParser() throws Exception {
+		addOpt(new Option("h", "help", "Show help message"));
 	}
 
-	public ArgParser(String version) {
-		this.opts.add(new Option("h", "help", "Show help message"));
+	public ArgParser(String version) throws Exception {
+		addOpt(new Option("h", "help", "Show help message"));
 		this.version = version;
 	}
 
-	public ArgParser(String version, Option[] opts) {
-		this.opts.add(new Option("h", "help", "Show help message"));
+	public ArgParser(String version, Option[] opts) throws Exception {
+		addOpt(new Option("h", "help", "Show help message"));
+		this.version = version;
+		addOpt(opts);
+	}
+
+	public ArgParser(String version, Class<?> optc) throws Exception {
+		addOpt(new Option("h", "help", "Show help message"));
+		this.version = version;
+		addOpt(optc);
+	}
+
+	public ArgParser(String version, Class<?>[] optDep) throws Exception {
+		addOpt(new Option("h", "help", "Show help message"));
+		this.version = version;
+		addOpt(optDep);
+	}
+
+	public ArgParser addOpt(Option opt) throws Exception {
+		this.opts.add(opt);
+		return this;
+	}
+
+	public ArgParser addOpt(Option[] opts) throws Exception {
 		for (Option opt : opts) {
-			this.opts.add(opt);
+			addOpt(opt);
 		}
-		this.version = version;
+		return this;
+	}
+
+	public ArgParser addOpt(Class<?> optc) throws Exception {
+		if (optcSet.contains(optc)) {
+			return this;
+		}
+
+		Field fopts;
+		ArgParser.Option[] opts;
+
+		try {
+			fopts = optc.getField("opts");
+			opts = (ArgParser.Option[]) fopts.get(optc);
+		} catch(Exception e) {
+			e.printStackTrace();
+			opts = null;
+		}
+		if (opts != null) {
+			addOpt(opts);
+		}
+
+		Field foptDep;
+		Class<?>[] optDep2;
+
+		try {
+			foptDep = optc.getField("optDep");
+			optDep2 = (Class<?>[]) foptDep.get(optc);
+		} catch(Exception e) {
+			e.printStackTrace();
+			optDep2 = null;
+		}
+		if (optDep2 != null) {
+			addOpt(optDep2);
+		}
+
+		return this;
+	}
+
+	public ArgParser addOpt(Class<?>[] optDep) throws Exception {
+		Field fopts;
+		ArgParser.Option[] opts;
+
+		for (Class<?> optc : optDep) {
+			if (optcSet.contains(optc)) {
+				continue;
+			}
+			try {
+				fopts = optc.getField("opts");
+				opts = (ArgParser.Option[]) fopts.get(optc);
+			} catch(Exception e) {
+				e.printStackTrace();
+				continue;
+			}
+			addOpt(opts);
+		}
+
+		Field foptDep;
+		Class<?>[] optDep2;
+		for (Class<?> optc : optDep) {
+			if (optcSet.contains(optc)) {
+				continue;
+			}
+			try {
+				foptDep = optc.getField("optDep");
+				optDep2 = (Class<?>[]) foptDep.get(optc);
+			} catch(Exception e) {
+				e.printStackTrace();
+				continue;
+			}
+			if (!optDep.equals(optDep2)) {
+				addOpt(optDep2);
+			}
+		}
+		return this;
 	}
 
 	public ArgParser parse(String[] args) throws Exception {
