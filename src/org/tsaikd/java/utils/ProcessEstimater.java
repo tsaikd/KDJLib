@@ -1,6 +1,12 @@
 package org.tsaikd.java.utils;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class ProcessEstimater {
+
+	static Log log = LogFactory.getLog(ProcessEstimater.class);
+
 	protected int max = 0;
 	protected int num = 0;
 	protected long time = 0;

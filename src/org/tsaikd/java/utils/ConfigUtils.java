@@ -5,7 +5,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class ConfigUtils {
+
+	static Log log = LogFactory.getLog(ConfigUtils.class);
+
 	protected static final String defaultResPath = "/config.properties";
 	protected static Map<String, Properties> confs = new HashMap<String, Properties>();
 

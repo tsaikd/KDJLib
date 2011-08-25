@@ -4,10 +4,12 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class ProcessStdoutThread extends Thread {
-	Logger log = Logger.getLogger(ProcessStdoutThread.class);
+
+	static Log log = LogFactory.getLog(ProcessStdoutThread.class);
 	Process prog = null;
 	Type type = Type.Stdout;
 

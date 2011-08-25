@@ -1,16 +1,18 @@
 package org.tsaikd.java.test;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class Test {
-	static Logger log = Logger.getLogger(Test.class);
+
+	static Log log = LogFactory.getLog(Test.class);
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception {
 		log.debug("Start");
-		log.debug("End");
+		log.info("End");
 	}
 
 }
