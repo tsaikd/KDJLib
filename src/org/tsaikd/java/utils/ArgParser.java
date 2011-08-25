@@ -105,12 +105,13 @@ public class ArgParser {
 		if (optcSet.contains(optc)) {
 			return this;
 		}
+		optcSet.add(optc);
 
 		Field fopts;
 		ArgParser.Option[] opts;
 
 		try {
-			fopts = optc.getField("opts");
+			fopts = optc.getDeclaredField("opts");
 			opts = (ArgParser.Option[]) fopts.get(optc);
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -124,7 +125,7 @@ public class ArgParser {
 		Class<?>[] optDep2;
 
 		try {
-			foptDep = optc.getField("optDep");
+			foptDep = optc.getDeclaredField("optDep");
 			optDep2 = (Class<?>[]) foptDep.get(optc);
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -138,39 +139,8 @@ public class ArgParser {
 	}
 
 	public ArgParser addOpt(Class<?>[] optDep) throws Exception {
-		Field fopts;
-		ArgParser.Option[] opts;
-
 		for (Class<?> optc : optDep) {
-			if (optcSet.contains(optc)) {
-				continue;
-			}
-			try {
-				fopts = optc.getField("opts");
-				opts = (ArgParser.Option[]) fopts.get(optc);
-			} catch(Exception e) {
-				e.printStackTrace();
-				continue;
-			}
-			addOpt(opts);
-		}
-
-		Field foptDep;
-		Class<?>[] optDep2;
-		for (Class<?> optc : optDep) {
-			if (optcSet.contains(optc)) {
-				continue;
-			}
-			try {
-				foptDep = optc.getField("optDep");
-				optDep2 = (Class<?>[]) foptDep.get(optc);
-			} catch(Exception e) {
-				e.printStackTrace();
-				continue;
-			}
-			if (!optDep.equals(optDep2)) {
-				addOpt(optDep2);
-			}
+			addOpt(optc);
 		}
 		return this;
 	}
@@ -187,7 +157,7 @@ public class ArgParser {
 		if (getCmd().hasOption("h")) {
 			HelpFormatter helpFmt = new HelpFormatter();
 			helpFmt.setWidth(getHelpWidth());
-			helpFmt.printHelp(ClassUtils.getClassName(), "Version: "
+			helpFmt.printHelp(ClassUtils.getClassName(false, 1), "Version: "
 				+ version, options, null, true);
 			System.exit(0);
 			return this;
