@@ -155,10 +155,7 @@ public class ArgParser {
 		cmd = new PosixParser().parse(options, args);
 
 		if (getCmd().hasOption("h")) {
-			HelpFormatter helpFmt = new HelpFormatter();
-			helpFmt.setWidth(getHelpWidth());
-			helpFmt.printHelp(ClassUtils.getClassName(false, 1), "Version: "
-				+ version, options, null, true);
+			printHelp(options, null);
 			System.exit(0);
 			return this;
 		}
@@ -180,6 +177,27 @@ public class ArgParser {
 		}
 
 		return this;
+	}
+
+	public void printHelp(Options options, String footer) {
+		HelpFormatter helpFmt = new HelpFormatter();
+		helpFmt.setWidth(getHelpWidth());
+		helpFmt.printHelp(ClassUtils.getClassName(false, 1), "Version: "
+			+ version, options, footer, true);
+	}
+
+	public void printHelp(String footer) {
+		Options options = new Options();
+
+		for (Option opt : opts) {
+			options.addOption(opt.opt, opt.longOpt, opt.hasArg, opt.description);
+		}
+
+		printHelp(options, footer);
+	}
+
+	public void printHelp() {
+		printHelp(null);
 	}
 
 	public CommandLine getCmd() {
