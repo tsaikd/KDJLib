@@ -38,14 +38,29 @@ public class ArgParser {
 			} else {
 				desc = "";
 			}
-			if (hasArg && (defaultArg != null)) {
+
+			if (hasArg) {
+				String confArg = null;
+				try {
+					confArg = ConfigUtils.get(longOpt, defaultArg.toString());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				if (confArg == null) {
+					if (defaultArg == null) {
+						confArg = "";
+					} else {
+						confArg = defaultArg.toString();
+					}
+				}
+
 				if (desc.length() > 0) {
 					desc += "\n";
 				}
-				if (defaultArg.toString().isEmpty()) {
+				if (confArg.isEmpty()) {
 					desc += "Default: \"\"";
 				} else {
-					desc += "Default: " + defaultArg.toString();
+					desc += "Default: " + confArg;
 				}
 			}
 			if (desc.length() < 1) {
