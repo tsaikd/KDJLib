@@ -38,6 +38,9 @@ public class ConfigUtils {
 	}
 
 	public static String get(final String key, final String defaultValue) throws Exception {
+		if (key == null) {
+			return null;
+		}
 		String value = System.getProperty(key);
 		if (value == null) {
 			value = getInstance().getProperty(key);
