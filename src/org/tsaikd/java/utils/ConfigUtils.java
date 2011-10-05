@@ -31,11 +31,11 @@ public class ConfigUtils {
 	List<PropInfo> propList = new LinkedList<PropInfo>();
 	Collection<String> pathList = new HashSet<String>();
 
+	static {
+		addClassResource(defaultResPath);
+	}
+
 	protected ConfigUtils() {
-		try {
-			addClassResource(defaultResPath);
-		} catch (Exception e) {
-		}
 	}
 
 	public static ConfigUtils addProperties(PropInfo info) {
@@ -176,9 +176,12 @@ public class ConfigUtils {
 
 		is = Thread.currentThread().getClass().getResourceAsStream(path);
 
-		if (is == null) {
+		if (is != null) {
+			log.debug("Load properties resource: " + path);
+		} else {
 			File file = new File(path);
 			if (file.exists() && file.canRead()) {
+				log.debug("Load properties file: " + file.getAbsolutePath());
 				try {
 					is = new FileInputStream(file);
 					info.modTime = file.lastModified();
