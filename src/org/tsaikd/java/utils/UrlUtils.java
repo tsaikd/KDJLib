@@ -9,11 +9,16 @@ public class UrlUtils {
 
 	public static Map<String, LinkedList<String>> getUrlParameters(String url) throws Exception {
 		Map<String, LinkedList<String>> params = new HashMap<String, LinkedList<String>>();
+
+		if (url == null) {
+			return params;
+		}
+
 		String query;
 		String[] urlParts = url.split("\\?");
 		if (urlParts.length > 1) {
 			query = urlParts[1];
-		} else if (url.indexOf("&") >= 0) {
+		} else if (url.indexOf("=") >= 0) {
 			query = url;
 		} else {
 			query = "";
