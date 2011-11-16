@@ -5,10 +5,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -18,8 +16,16 @@ public class ConfigUtils {
 
 	static Log log = LogFactory.getLog(ConfigUtils.class);
 
-	static final String defaultResPath = "/config.properties";
+	static final String defaultResPath = "config.properties";
 	static ConfigUtils instance = new ConfigUtils();
+
+	@SuppressWarnings("serial")
+	static LinkedList<String> searchPath = new LinkedList<String>() {{
+		add("");
+		add("/");
+		add("/../");
+		add("/../../");
+	}};
 
 	public class PropInfo {
 		Properties prop = null;
@@ -28,8 +34,8 @@ public class ConfigUtils {
 		boolean autoReaload = false;
 	}
 
-	List<PropInfo> propList = new LinkedList<PropInfo>();
-	Collection<String> pathList = new HashSet<String>();
+	LinkedList<PropInfo> propList = new LinkedList<PropInfo>();
+	HashMap<String, PropInfo> propPathMap = new HashMap<String, PropInfo>();
 
 	static {
 		addClassResource(defaultResPath);
@@ -43,12 +49,18 @@ public class ConfigUtils {
 			return instance;
 		}
 		instance.propList.add(0, info);
-		instance.pathList.add(info.path);
+		instance.propPathMap.put(info.path, info);
 		return instance;
 	}
 
 	public static ConfigUtils addClassResource(String path, boolean autoReload) {
-		if (instance.pathList.contains(path)) {
+		if (instance.propPathMap.containsKey(path)) {
+			PropInfo info = instance.propPathMap.get(path);
+			if (info.autoReaload != autoReload) {
+				info.autoReaload = autoReload;
+				instance.propPathMap.put(path, info);
+				log.debug("Modify properties resource: " + path);
+			}
 			return instance;
 		}
 
@@ -179,7 +191,16 @@ public class ConfigUtils {
 		if (is != null) {
 			log.debug("Load properties resource: " + path);
 		} else {
+			String base = ConfigUtils.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 			File file = new File(path);
+			if ((!file.exists()) || (!file.canRead())) {
+				for (String inc : searchPath) {
+					file = new File(base + inc + path);
+					if (file.exists() && file.canRead()) {
+						break;
+					}
+				}
+			}
 			if (file.exists() && file.canRead()) {
 				log.debug("Load properties file: " + file.getAbsolutePath());
 				try {
