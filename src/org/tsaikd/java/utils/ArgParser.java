@@ -197,7 +197,7 @@ public class ArgParser {
 	public void printHelp(Options options, String footer) {
 		HelpFormatter helpFmt = new HelpFormatter();
 		helpFmt.setWidth(getHelpWidth());
-		helpFmt.printHelp(ClassUtils.getClassName(false, 1), "Version: "
+		helpFmt.printHelp(ClassUtils.getClassName(false, 2), "Version: "
 			+ version, options, footer, true);
 	}
 
