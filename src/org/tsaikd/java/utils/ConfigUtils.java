@@ -18,6 +18,7 @@ public class ConfigUtils {
 
 	static final String defaultResPath = "config.properties";
 	static ConfigUtils instance = new ConfigUtils();
+	static Class<?> searchBase = ConfigUtils.class;
 
 	@SuppressWarnings("serial")
 	static LinkedList<String> searchPath = new LinkedList<String>() {{
@@ -36,10 +37,6 @@ public class ConfigUtils {
 
 	LinkedList<PropInfo> propList = new LinkedList<PropInfo>();
 	HashMap<String, PropInfo> propPathMap = new HashMap<String, PropInfo>();
-
-	static {
-		addClassResource(defaultResPath);
-	}
 
 	protected ConfigUtils() {
 	}
@@ -73,6 +70,10 @@ public class ConfigUtils {
 		return addClassResource(path, false);
 	}
 
+	public static void setSearchBase(Class<?> base) {
+		searchBase = base;
+	}
+
 	public static void set(final String key, final String value) {
 		System.setProperty(key, value);
 	}
@@ -84,6 +85,10 @@ public class ConfigUtils {
 		String value = System.getProperty(key);
 		if (value != null) {
 			return value;
+		}
+
+		if (instance.propList.isEmpty()) {
+			addClassResource(defaultResPath);
 		}
 
 		try {
@@ -180,36 +185,63 @@ public class ConfigUtils {
 		return getBool(key, false);
 	}
 
+	private static File searchPropFromFile(String path) {
+		String base = searchBase.getProtectionDomain().getCodeSource().getLocation().getPath();
+		File file = new File(path);
+
+		if (file.exists() && file.canRead()) {
+			return file;
+		}
+
+		for (String inc : searchPath) {
+			file = new File(base + inc + path);
+			if (file.exists() && file.canRead()) {
+				return file;
+			}
+		}
+
+		return null;
+	}
+
+	private static InputStream searchPropFromResource(String path) {
+		InputStream is = null;
+
+		for (String inc : searchPath) {
+			is = searchBase.getResourceAsStream(inc + path);
+			if (is != null) {
+				log.debug("Load properties from search path resource: " + inc + path);
+				return is;
+			}
+		}
+
+		is = Thread.currentThread().getClass().getResourceAsStream(path);
+		if (is != null) {
+			log.debug("Load properties from current thread resource: " + path);
+			return is;
+		}
+
+		return is;
+	}
+
 	public static PropInfo getPropInfoByPath(String path) {
 		PropInfo info = instance.new PropInfo();
-		InputStream is;
+		InputStream is = null;
 
 		info.path = path;
 
-		is = Thread.currentThread().getClass().getResourceAsStream(path);
+		File file = searchPropFromFile(path);
+		if (file != null && file.exists() && file.canRead()) {
+			log.debug("Load properties file: " + file.getAbsolutePath());
+			try {
+				is = new FileInputStream(file);
+				info.modTime = file.lastModified();
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+		}
 
-		if (is != null) {
-			log.debug("Load properties resource: " + path);
-		} else {
-			String base = ConfigUtils.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-			File file = new File(path);
-			if ((!file.exists()) || (!file.canRead())) {
-				for (String inc : searchPath) {
-					file = new File(base + inc + path);
-					if (file.exists() && file.canRead()) {
-						break;
-					}
-				}
-			}
-			if (file.exists() && file.canRead()) {
-				log.debug("Load properties file: " + file.getAbsolutePath());
-				try {
-					is = new FileInputStream(file);
-					info.modTime = file.lastModified();
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
-				}
-			}
+		if (is == null) {
+			is = searchPropFromResource(path);
 		}
 
 		if (is != null) {
@@ -221,7 +253,11 @@ public class ConfigUtils {
 				e.printStackTrace();
 			}
 		} else {
-			log.debug("Can not load file: " + path);
+			log.error("Can not load properties file: " + path);
+			if (log.isDebugEnabled()) {
+				String base = searchBase.getProtectionDomain().getCodeSource().getLocation().getPath();
+				log.debug("Loader base: " + base);
+			}
 		}
 
 		return info;
