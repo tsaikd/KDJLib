@@ -87,6 +87,11 @@ public class ConfigUtils {
 			return value;
 		}
 
+		value = System.getenv(key);
+		if (value != null) {
+			return value;
+		}
+
 		if (instance.propList.isEmpty()) {
 			addClassResource(defaultResPath);
 		}
