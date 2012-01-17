@@ -239,6 +239,7 @@ public class ConfigUtils {
 			log.debug("Load properties file: " + file.getAbsolutePath());
 			try {
 				is = new FileInputStream(file);
+				info.path = file.getAbsolutePath();
 				info.modTime = file.lastModified();
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
