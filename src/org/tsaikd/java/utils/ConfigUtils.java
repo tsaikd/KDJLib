@@ -50,7 +50,11 @@ public class ConfigUtils {
 		}
 		instance.propList.add(0, info);
 		instance.propPathMap.put(info.originPath, info);
-		log.debug("Load properties file: " + info.realPath);
+		if (info.realPath == null) {
+			log.debug("Load properties from resource");
+		} else {
+			log.debug("Load properties file: " + info.realPath);
+		}
 		return instance;
 	}
 
