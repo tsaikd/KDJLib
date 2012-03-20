@@ -209,6 +209,7 @@ public class ConfigUtils {
 
 	private static File searchPropFromFile(String path) {
 		String base = searchBase.getProtectionDomain().getCodeSource().getLocation().getPath();
+		log.debug("Search base: " + base);
 		File file = new File(path);
 
 		if (file.exists() && file.canRead()) {
