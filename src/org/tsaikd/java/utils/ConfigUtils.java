@@ -25,6 +25,7 @@ public class ConfigUtils {
 	@SuppressWarnings("serial")
 	private static LinkedList<String> searchPath = new LinkedList<String>() {{
 		add("");
+		add("../");
 		add("/");
 		add("/../");
 		add("/../../");
@@ -50,9 +51,7 @@ public class ConfigUtils {
 		}
 		instance.propList.add(0, info);
 		instance.propPathMap.put(info.originPath, info);
-		if (info.realPath == null) {
-			log.debug("Load properties from resource");
-		} else {
+		if (info.realPath != null) {
 			log.debug("Load properties file: " + info.realPath);
 		}
 		return instance;
@@ -217,6 +216,13 @@ public class ConfigUtils {
 		}
 
 		for (String inc : searchPath) {
+			if (!inc.startsWith("/")) {
+				file = new File(inc + path);
+				if (file.exists() && file.canRead()) {
+					return file;
+				}
+			}
+
 			file = new File(base + inc + path);
 			if (file.exists() && file.canRead()) {
 				return file;
