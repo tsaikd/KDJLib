@@ -100,6 +100,7 @@ public class ConfigUtils {
 
 		value = System.getenv(key);
 		if (value != null) {
+			System.setProperty(key, value);
 			return value;
 		}
 
@@ -136,6 +137,9 @@ public class ConfigUtils {
 	
 				value = info.prop.getProperty(key);
 				if (value != null) {
+					if (!info.autoReaload) {
+						System.setProperty(key, value);
+					}
 					return value;
 				}
 			}
