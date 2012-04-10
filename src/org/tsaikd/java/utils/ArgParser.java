@@ -220,6 +220,10 @@ public class ArgParser {
 	}
 
 	public int getHelpWidth() {
+		String cols = ConfigUtils.get("COLUMNS");
+		if (cols != null && !cols.isEmpty()) {
+			return Integer.parseInt(cols);
+		}
 		return helpWidth;
 	}
 
