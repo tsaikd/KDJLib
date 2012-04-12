@@ -7,20 +7,20 @@ public class ProcessEstimater {
 
 	static Log log = LogFactory.getLog(ProcessEstimater.class);
 
-	protected int max = 0;
-	protected int num = 0;
+	protected long max = 0;
+	protected long num = 0;
 	protected long time = 0;
 	protected long rest = 0;
 
-	public ProcessEstimater(int max) {
+	public ProcessEstimater(long max) {
 		this.max = max;
 	}
 
-	public ProcessEstimater setNum(int num) {
+	public ProcessEstimater setNum(long num) {
 		if (this.time > 0) {
 			long now = System.currentTimeMillis();
 			long diffTime = now - this.time;
-			int restNum = max - num;
+			long restNum = max - num;
 			this.rest = diffTime * restNum / num;
 		} else {
 			this.time = System.currentTimeMillis();
@@ -29,7 +29,7 @@ public class ProcessEstimater {
 		return this;
 	}
 
-	public int getNum() {
+	public long getNum() {
 		return num;
 	}
 
