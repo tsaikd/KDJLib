@@ -29,6 +29,11 @@ public class ProcessEstimater {
 		return this;
 	}
 
+	public ProcessEstimater setRestNum(long rest) {
+		long num = max - rest;
+		return setNum(num);
+	}
+
 	public long getNum() {
 		return num;
 	}
@@ -48,10 +53,9 @@ public class ProcessEstimater {
 		int hr = (int) rest;
 
 		if (hr > 0) {
-			return String.format("%1$02d:%2$02d:%3$02d.%4$03d", hr, min, sec,
-					msec);
+			return String.format("%1$02d:%2$02d:%3$02d", hr, min, sec, msec);
 		} else if (min > 0) {
-			return String.format("%2$02d:%3$02d.%4$03d", hr, min, sec, msec);
+			return String.format("%2$02d:%3$02d", hr, min, sec, msec);
 		} else {
 			return String.format("%3$02d.%4$03d", hr, min, sec, msec);
 		}
