@@ -296,4 +296,33 @@ public class ConfigUtils {
 		return info;
 	}
 
+	public static boolean checkConfigPath(String name, boolean testRead, boolean testWrite) {
+		String path = get(name);
+		File file = new File(path);
+		String msg = "";
+
+		while (true) {
+			if (!file.exists()) {
+				msg += "[NO FOUND]";
+				break;
+			}
+			if (testRead && !file.canRead()) {
+				msg += "[DENY READ]";
+			}
+			if (testWrite && !file.canWrite()) {
+				msg += "[DENY WRITE]";
+			}
+			break;
+		}
+
+		if (msg.isEmpty()) {
+			msg = "[OK]";
+			log.debug(msg + " " + name + "=" + path);
+			return true;
+		} else {
+			log.error(msg + " " + name + "=" + path);
+			return false;
+		}
+	}
+
 }
