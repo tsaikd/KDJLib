@@ -1,5 +1,7 @@
 package org.tsaikd.java.utils;
 
+import java.util.Date;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -7,10 +9,11 @@ public class ProcessEstimater {
 
 	static Log log = LogFactory.getLog(ProcessEstimater.class);
 
-	protected long max = 0;
-	protected long num = 0;
-	protected long time = 0;
-	protected long rest = 0;
+	private long max = 0;
+	private long num = 0;
+	private long time = 0;
+	private long rest = 0;
+	private String outputFormat = "%1$s";
 
 	public ProcessEstimater(long max) {
 		this.max = max;
@@ -29,13 +32,13 @@ public class ProcessEstimater {
 		return this;
 	}
 
+	public long getNum() {
+		return num;
+	}
+
 	public ProcessEstimater setRestNum(long rest) {
 		long num = max - rest;
 		return setNum(num);
-	}
-
-	public long getNum() {
-		return num;
 	}
 
 	public String getRestString() {
@@ -61,8 +64,40 @@ public class ProcessEstimater {
 		}
 	}
 
+	/**
+	 * Set format of output string
+	 *   %1$s   : time
+	 *   %2$d   : num
+	 *   %3$d   : rest
+	 *   %4$d   : max
+	 *   %5$.2f : 100.0 * num / max 
+	 *   %6$.2f : 100.0 * rest / max 
+	 *   default : "%1$s"
+	 *   example : "%2$d / %4$d (%5$.2f%%) , Rest time: %1$s"
+	 * @param format
+	 * @return
+	 */
+	public ProcessEstimater setFormat(String format) {
+		this.outputFormat = format;
+		return this;
+	}
+
 	@Override
 	public String toString() {
-		return getRestString();
+		return String.format(outputFormat, getRestString(), num, rest, max, (float) 100.0 * num / max, (float) 100.0 * rest / max);
+	}
+
+	public String toString1(Object args) {
+		return String.format(outputFormat, getRestString(), num, rest, max, (float) 100.0 * num / max, (float) 100.0 * rest / max, args);
+	}
+
+	private Date prevMsg = null;
+	public ProcessEstimater debug(Log log, long minTime) {
+		if (prevMsg != null && prevMsg.after(new Date())) {
+			return this;
+		}
+		prevMsg = new Date(new Date().getTime() + minTime);
+		log.debug(toString());
+		return this;
 	}
 }
