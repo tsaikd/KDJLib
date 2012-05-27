@@ -29,6 +29,7 @@ public class ConfigUtils {
 		add("/");
 		add("/../");
 		add("/../../");
+		add("/../../WebContent/WEB-INF/");
 	}};
 
 	public class PropInfo {
