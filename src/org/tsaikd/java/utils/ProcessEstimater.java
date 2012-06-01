@@ -36,6 +36,14 @@ public class ProcessEstimater {
 		return num;
 	}
 
+	public ProcessEstimater addNum(long add) {
+		return setNum(num + add);
+	}
+
+	public ProcessEstimater addNum() {
+		return addNum(1);
+	}
+
 	public ProcessEstimater setRestNum(long rest) {
 		long num = max - rest;
 		return setNum(num);
