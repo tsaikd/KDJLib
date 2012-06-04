@@ -73,14 +73,14 @@ public class ProcessEstimater {
 	}
 
 	/**
-	 * Set format of output string
-	 *   %1$s   : time
-	 *   %2$d   : num
-	 *   %3$d   : rest
-	 *   %4$d   : max
-	 *   %5$.2f : 100.0 * num / max 
-	 *   %6$.2f : 100.0 * rest / max 
-	 *   default : "%1$s"
+	 * Set format of output string <BR/>
+	 *   %1$s   : time <BR/>
+	 *   %2$d   : num <BR/>
+	 *   %3$d   : rest <BR/>
+	 *   %4$d   : max <BR/>
+	 *   %5$.2f : 100.0 * num / max <BR/>
+	 *   %6$.2f : 100.0 * rest / max <BR/>
+	 *   default : "%1$s" <BR/>
 	 *   example : "%2$d / %4$d (%5$.2f%%) , Rest time: %1$s"
 	 * @param format
 	 * @return
