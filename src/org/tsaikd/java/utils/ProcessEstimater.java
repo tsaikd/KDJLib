@@ -101,7 +101,7 @@ public class ProcessEstimater {
 
 	private Date prevMsg = null;
 	public ProcessEstimater debug(Log log, long minTime) {
-		if (prevMsg != null && prevMsg.after(new Date())) {
+		if (minTime > 0 && prevMsg != null && prevMsg.after(new Date())) {
 			return this;
 		}
 		prevMsg = new Date(new Date().getTime() + minTime);
