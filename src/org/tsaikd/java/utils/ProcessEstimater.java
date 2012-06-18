@@ -9,35 +9,55 @@ public class ProcessEstimater {
 
 	static Log log = LogFactory.getLog(ProcessEstimater.class);
 
+	private int SLOT_SIZE;
+	private int SLOT_GAPTIME;
+	private long[] numList;
+	private long[] timeList;
 	private long max = 0;
-	private long num = 0;
-	private long time = 0;
-	private long rest = 0;
+	private int slot = -1;
 	private String outputFormat = "%1$s";
 
+	public ProcessEstimater(int slotSize, int slotGapTime, long max) {
+		init(slotSize, slotGapTime, max);
+	}
+
 	public ProcessEstimater(long max) {
+		init(30, 1000, max);
+	}
+
+	private void init(int slotSize, int slotGapTime, long max) {
+		this.SLOT_SIZE = 30;
+		this.SLOT_GAPTIME = 1000;
+		numList = new long[SLOT_SIZE];
+		timeList = new long[SLOT_SIZE];
+
 		this.max = max;
 	}
 
-	public ProcessEstimater setNum(long num) {
-		if (this.time > 0) {
-			long now = System.currentTimeMillis();
-			long diffTime = now - this.time;
-			long restNum = max - num;
-			this.rest = diffTime * restNum / num;
+	public synchronized ProcessEstimater setNum(long num) {
+		long now = System.currentTimeMillis();
+		if (slot < 0) {
+			slot = 0;
+			for (int i=0 ; i<SLOT_SIZE ; i++) {
+				numList[i] = num;
+				timeList[i] = now;
+			}
 		} else {
-			this.time = System.currentTimeMillis();
+			if ((now - timeList[(slot + SLOT_SIZE - 1) % SLOT_SIZE]) > SLOT_GAPTIME) {
+				slot = (slot + 1) % SLOT_SIZE;
+			}
+			numList[slot] = num;
+			timeList[slot] = now;
 		}
-		this.num = num;
 		return this;
 	}
 
 	public long getNum() {
-		return num;
+		return numList[slot];
 	}
 
 	public ProcessEstimater addNum(long add) {
-		return setNum(num + add);
+		return setNum(getNum() + add);
 	}
 
 	public ProcessEstimater addNum() {
@@ -49,8 +69,22 @@ public class ProcessEstimater {
 		return setNum(num);
 	}
 
+	public long getRestNum() {
+		return max - getNum();
+	}
+
+	private long getRestTime() {
+		int slotcmp = (slot + 1) % SLOT_SIZE;
+		long diffTime = timeList[slot] - timeList[slotcmp];
+		long diffNum = numList[slot] - numList[slotcmp];
+		if (diffNum < 1) {
+			return 0;
+		}
+		return getRestNum() * diffTime / diffNum;
+	}
+
 	public String getRestString() {
-		long rest = this.rest;
+		long rest = getRestTime();
 
 		int msec = (int) (rest % 1000);
 		rest /= 1000;
@@ -74,12 +108,12 @@ public class ProcessEstimater {
 
 	/**
 	 * Set format of output string <BR/>
-	 *   %1$s   : time <BR/>
-	 *   %2$d   : num <BR/>
-	 *   %3$d   : rest <BR/>
-	 *   %4$d   : max <BR/>
-	 *   %5$.2f : 100.0 * num / max <BR/>
-	 *   %6$.2f : 100.0 * rest / max <BR/>
+	 *   %1$s   : rest time <BR/>
+	 *   %2$d   : cur num <BR/>
+	 *   %3$d   : rest num <BR/>
+	 *   %4$d   : max num <BR/>
+	 *   %5$.2f : 100.0 * (cur num) / (max num) <BR/>
+	 *   %6$.2f : 100.0 * (rest num) / (max num) <BR/>
 	 *   default : "%1$s" <BR/>
 	 *   example : "%2$d / %4$d (%5$.2f%%) , Rest time: %1$s"
 	 * @param format
@@ -90,13 +124,31 @@ public class ProcessEstimater {
 		return this;
 	}
 
+	public ProcessEstimater setFormatDefNum() {
+		return setFormat("%2$d / %4$d (%5$.2f%%) , Rest time: %1$s");
+	}
+
+	public ProcessEstimater setFormatDefRest() {
+		return setFormat("%3$d / %4$d (%6$.2f%%) , Rest time: %1$s");
+	}
+
 	@Override
 	public String toString() {
+		if (slot < 0) {
+			return String.format(outputFormat, getRestString(), 0, max, max, 0, 100);
+		}
+		long num = getNum();
+		long rest = getRestNum();
 		return String.format(outputFormat, getRestString(), num, rest, max, (float) 100.0 * num / max, (float) 100.0 * rest / max);
 	}
 
-	public String toString1(Object args) {
-		return String.format(outputFormat, getRestString(), num, rest, max, (float) 100.0 * num / max, (float) 100.0 * rest / max, args);
+	public String toString1(Object arg7) {
+		if (slot < 0) {
+			return String.format(outputFormat, getRestString(), 0, max, max, 0, 100);
+		}
+		long num = getNum();
+		long rest = getRestNum();
+		return String.format(outputFormat, getRestString(), num, rest, max, (float) 100.0 * num / max, (float) 100.0 * rest / max, arg7);
 	}
 
 	private Date prevMsg = null;
