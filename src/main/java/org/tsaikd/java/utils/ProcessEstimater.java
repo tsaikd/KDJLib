@@ -14,24 +14,30 @@ public class ProcessEstimater {
 	private long[] numList;
 	private long[] timeList;
 	private long max = 0;
+	private long skip = 0;
 	private int slot = -1;
 	private String outputFormat = "%1$s";
 
-	public ProcessEstimater(int slotSize, int slotGapTime, long max) {
-		init(slotSize, slotGapTime, max);
+	public ProcessEstimater(int slotSize, int slotGapTime, long max, long skip) {
+		init(slotSize, slotGapTime, max, skip);
+	}
+
+	public ProcessEstimater(long max, long skip) {
+		init(30, 1000, max, skip);
 	}
 
 	public ProcessEstimater(long max) {
-		init(30, 1000, max);
+		init(30, 1000, max, 0);
 	}
 
-	private void init(int slotSize, int slotGapTime, long max) {
+	private void init(int slotSize, int slotGapTime, long max, long skip) {
 		this.SLOT_SIZE = 30;
 		this.SLOT_GAPTIME = 1000;
 		numList = new long[SLOT_SIZE];
 		timeList = new long[SLOT_SIZE];
 
 		this.max = max;
+		this.skip = skip;
 	}
 
 	public synchronized ProcessEstimater setNum(long num) {
@@ -65,7 +71,7 @@ public class ProcessEstimater {
 	}
 
 	public ProcessEstimater setRestNum(long rest) {
-		long num = max - rest;
+		long num = max - skip - rest;
 		return setNum(num);
 	}
 
