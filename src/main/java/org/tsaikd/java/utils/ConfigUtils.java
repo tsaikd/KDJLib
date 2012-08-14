@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Properties;
@@ -19,11 +20,11 @@ public class ConfigUtils {
 	static Log log = LogFactory.getLog(ConfigUtils.class);
 
 	private static final String defaultResPath = "config.properties";
-	private static ConfigUtils instance = new ConfigUtils();
 	private static Class<?> searchBase = ConfigUtils.class;
+	private static ConfigUtils instance = new ConfigUtils();
 
 	@SuppressWarnings("serial")
-	private static LinkedList<String> searchPath = new LinkedList<String>() {{
+	private static ArrayList<String> searchPath = new ArrayList<String>() {{
 		add("");
 		add("../");
 		add("/");
@@ -40,8 +41,9 @@ public class ConfigUtils {
 		boolean autoReaload = false;
 	}
 
-	private LinkedList<PropInfo> propList = new LinkedList<PropInfo>();
-	private HashMap<String, PropInfo> propPathMap = new HashMap<String, PropInfo>();
+	private LinkedList<PropInfo> propList = new LinkedList<>();
+	private HashMap<String, PropInfo> propPathMap = new HashMap<>();
+	private HashMap<String, String> propCache = new HashMap<>();
 
 	protected ConfigUtils() {
 	}
@@ -87,21 +89,28 @@ public class ConfigUtils {
 	}
 
 	public static void set(final String key, final String value) {
-		System.setProperty(key, value);
+		instance.propCache.put(key, value);
 	}
 
 	public static String get(final String key, final String defaultValue) {
 		if (key == null) {
 			return null;
 		}
-		String value = System.getProperty(key);
+
+		String value = instance.propCache.get(key);
 		if (value != null) {
+			return value;
+		}
+
+		value = System.getProperty(key);
+		if (value != null) {
+			set(key, value);
 			return value;
 		}
 
 		value = System.getenv(key);
 		if (value != null) {
-			System.setProperty(key, value);
+			set(key, value);
 			return value;
 		}
 
@@ -139,7 +148,7 @@ public class ConfigUtils {
 				value = info.prop.getProperty(key);
 				if (value != null) {
 					if (!info.autoReaload) {
-						System.setProperty(key, value);
+						set(key, value);
 					}
 					return value;
 				}
@@ -156,7 +165,7 @@ public class ConfigUtils {
 	}
 
 	public static void set(final String key, final int value) {
-		System.setProperty(key, String.valueOf(value));
+		set(key, String.valueOf(value));
 	}
 
 	public static int getInt(final String key, final int defaultValue) {
@@ -173,7 +182,7 @@ public class ConfigUtils {
 	}
 
 	public static void set(final String key, final long value) {
-		System.setProperty(key, String.valueOf(value));
+		set(key, String.valueOf(value));
 	}
 
 	public static long getLong(final String key, final long defaultValue) {
@@ -190,7 +199,7 @@ public class ConfigUtils {
 	}
 
 	public static void set(final String key, final boolean value) {
-		System.setProperty(key, String.valueOf(value));
+		set(key, String.valueOf(value));
 	}
 
 	public static boolean getBool(final String key, final boolean defaultValue) {
