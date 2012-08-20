@@ -29,6 +29,7 @@ public class ConfigUtils {
 		add("../");
 		add("/");
 		add("/../");
+		add("../../");
 		add("/../../");
 		add("/../../WebContent/WEB-INF/");
 	}};
@@ -222,7 +223,11 @@ public class ConfigUtils {
 
 	private static File searchPropFromFile(String path) {
 		String base = searchBase.getProtectionDomain().getCodeSource().getLocation().getPath();
-		log.debug("Search base: " + base);
+		File fileBase = new File(base);
+		if (!fileBase.isDirectory()) {
+			base = fileBase.getParent();
+		}
+		log.debug("Search base: " + base + ", for: " + path);
 		File file = new File(path);
 
 		if (file.exists() && file.canRead()) {
