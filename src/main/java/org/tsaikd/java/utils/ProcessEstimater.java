@@ -59,6 +59,9 @@ public class ProcessEstimater {
 	}
 
 	public long getNum() {
+		if (slot < 0) {
+			return 0;
+		}
 		return numList[slot];
 	}
 
@@ -148,22 +151,30 @@ public class ProcessEstimater {
 		return String.format(outputFormat, getRestString(), num, rest, max, (float) 100.0 * num / max, (float) 100.0 * rest / max);
 	}
 
-	public String toString1(Object arg7) {
-		if (slot < 0) {
-			return String.format(outputFormat, getRestString(), 0, max, max, 0, 100);
-		}
-		long num = getNum();
-		long rest = getRestNum();
-		return String.format(outputFormat, getRestString(), num, rest, max, (float) 100.0 * num / max, (float) 100.0 * rest / max, arg7);
-	}
-
 	private Date prevMsg = null;
-	public ProcessEstimater debug(Log log, long minTime) {
+	public ProcessEstimater debug(Log log, long minTime, String msg) {
 		if (minTime > 0 && prevMsg != null && prevMsg.after(new Date())) {
 			return this;
 		}
 		prevMsg = new Date(new Date().getTime() + minTime);
-		log.debug(toString());
+		if (msg != null) {
+			log.debug(toString() + " " + msg);
+		} else {
+			log.debug(toString());
+		}
 		return this;
 	}
+
+	public ProcessEstimater debug(Log log, long minTime) {
+		return debug(log, minTime, null);
+	}
+
+	public ProcessEstimater debug(Log log, String msg) {
+		return debug(log, 0, msg);
+	}
+
+	public ProcessEstimater debug(Log log) {
+		return debug(log, 0, null);
+	}
+
 }

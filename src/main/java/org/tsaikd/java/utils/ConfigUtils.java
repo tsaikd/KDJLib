@@ -89,6 +89,15 @@ public class ConfigUtils {
 		searchBase = base;
 	}
 
+	public static String getSearchBaseVersion() {
+		String version = searchBase.getPackage().getImplementationVersion();
+		if (version != null) {
+			return version;
+		}
+		version = searchBase.getPackage().getSpecificationVersion();
+		return version;
+	}
+
 	public static void set(final String key, final String value) {
 		instance.propCache.put(key, value);
 	}
@@ -221,7 +230,7 @@ public class ConfigUtils {
 		return getBool(key, false);
 	}
 
-	private static File searchPropFromFile(String path) {
+	public static File searchPropFromFile(String path) {
 		String base = searchBase.getProtectionDomain().getCodeSource().getLocation().getPath();
 		File fileBase = new File(base);
 		if (!fileBase.isDirectory()) {
@@ -251,7 +260,7 @@ public class ConfigUtils {
 		return null;
 	}
 
-	private static InputStream searchPropFromResource(String path) {
+	public static InputStream searchPropFromResource(String path) {
 		InputStream is = null;
 
 		for (String inc : searchPath) {

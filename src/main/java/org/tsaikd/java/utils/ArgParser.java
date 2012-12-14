@@ -1,36 +1,48 @@
 package org.tsaikd.java.utils;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
 public class ArgParser {
 
 	static Log log = LogFactory.getLog(ArgParser.class);
-	String version = "1.0";
-	Collection<Option> opts = new LinkedList<ArgParser.Option>();
-	Collection<Class<?>> optcSet = new HashSet<Class<?>>();
-	CommandLine cmd = null;
-	int helpWidth = 80;
+	private String version;
+	private LinkedList<ArgParser.Option> opts = new LinkedList<>();
+	private HashSet<Class<?>> optcSet = new HashSet<>();
+	private CommandLine cmd;
+	private int helpWidth = 80;
+	private HashMap<String, Object> optMap = new HashMap<>();
 
 	static public class Option {
 		String opt = null;
 		String longOpt = null;
 		boolean hasArg = false;
+		Object defaultArg = null;
 		String description = null;
 
 		public Option(String opt, String longOpt, boolean hasArg, Object defaultArg, String description) {
 			this.opt = opt;
 			this.longOpt = longOpt;
 			this.hasArg = hasArg;
+			this.defaultArg = defaultArg;
 
 			String desc;
 			if (description != null) {
@@ -72,74 +84,91 @@ public class ArgParser {
 
 	}
 
-	public ArgParser() throws Exception {
-		addOpt(new Option("h", "help", "Show help message"));
+	public static String getPomVersion() {
+		String version = ConfigUtils.getSearchBaseVersion();
+		if (version != null) {
+			return version;
+		}
+		File filePom = ConfigUtils.searchPropFromFile("pom.xml");
+		if (filePom != null) {
+			try {
+				Document docPom = XPathUtils.parseDocumentr(filePom);
+				if (docPom != null) {
+					Node node = XPathUtils.selectSingleNode(docPom, "/project/version/text()");
+					if (node != null) {
+						return node.getNodeValue();
+					}
+				}
+			} catch (SAXException | IOException | ParserConfigurationException | XPathExpressionException e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
 	}
 
-	public ArgParser(String version) throws Exception {
+	public ArgParser() {
+		addOpt(new Option("h", "help", "Show help message"));
+		this.version = getPomVersion();
+	}
+
+	public ArgParser(String version) {
 		addOpt(new Option("h", "help", "Show help message"));
 		this.version = version;
 	}
 
-	public ArgParser(String version, Option[] opts) throws Exception {
+	public ArgParser(Class<?> optc) {
 		addOpt(new Option("h", "help", "Show help message"));
-		this.version = version;
-		addOpt(opts);
+		this.version = getPomVersion();
+		addOpt(optc);
 	}
 
-	public ArgParser(String version, Class<?> optc) throws Exception {
+	public ArgParser(String version, Class<?> optc) {
 		addOpt(new Option("h", "help", "Show help message"));
 		this.version = version;
 		addOpt(optc);
 	}
 
-	public ArgParser(String version, Class<?>[] optDep) throws Exception {
-		addOpt(new Option("h", "help", "Show help message"));
-		this.version = version;
-		addOpt(optDep);
-	}
-
-	public ArgParser addOpt(Option opt) throws Exception {
+	public ArgParser addOpt(Option opt) {
 		this.opts.add(opt);
 		return this;
 	}
 
-	public ArgParser addOpt(Option[] opts) throws Exception {
+	public ArgParser addOpt(Option[] opts) {
 		for (Option opt : opts) {
 			addOpt(opt);
 		}
 		return this;
 	}
 
-	public ArgParser addOpt(Class<?> optc) throws Exception {
+	public ArgParser addOpt(Class<?> optc) {
 		if (optcSet.contains(optc)) {
 			return this;
 		}
 		optcSet.add(optc);
 
 		Field fopts;
-		ArgParser.Option[] opts;
+		ArgParser.Option[] opts = null;
 
 		try {
 			fopts = optc.getDeclaredField("opts");
 			opts = (ArgParser.Option[]) fopts.get(optc);
-		} catch(Exception e) {
+		} catch (NoSuchFieldException e) {
+		} catch (IllegalAccessException e) {
 			e.printStackTrace();
-			opts = null;
 		}
 		if (opts != null) {
 			addOpt(opts);
 		}
 
 		Field foptDep;
-		Class<?>[] optDep2;
+		Class<?>[] optDep2 = null;
 
 		try {
 			foptDep = optc.getDeclaredField("optDep");
 			optDep2 = (Class<?>[]) foptDep.get(optc);
-		} catch(Exception e) {
+		} catch(NoSuchFieldException e) {
+		} catch(IllegalAccessException e) {
 			e.printStackTrace();
-			optDep2 = null;
 		}
 		if (optDep2 != null) {
 			addOpt(optDep2);
@@ -148,14 +177,52 @@ public class ArgParser {
 		return this;
 	}
 
-	public ArgParser addOpt(Class<?>[] optDep) throws Exception {
+	public ArgParser addOpt(Class<?>[] optDep) {
 		for (Class<?> optc : optDep) {
 			addOpt(optc);
 		}
 		return this;
 	}
 
-	public ArgParser parse(String[] args) throws Exception {
+	public Object getOpt(String key) {
+		return optMap.get(key);
+	}
+
+	public String getOptString(String key) {
+		if (optMap.containsKey(key)) {
+			Object value = optMap.get(key);
+			if (value != null) {
+				return value.toString();
+			}
+		}
+		return null;
+	}
+
+	public Integer getOptInt(String key) {
+		String value = getOptString(key);
+		if (value != null) {
+			return Integer.parseInt(value);
+		}
+		return null;
+	}
+
+	public Long getOptLong(String key) {
+		String value = getOptString(key);
+		if (value != null) {
+			return Long.parseLong(value);
+		}
+		return null;
+	}
+
+	public Boolean getOptBoolean(String key) {
+		String value = getOptString(key);
+		if (value != null) {
+			return Boolean.parseBoolean(value);
+		}
+		return null;
+	}
+
+	public ArgParser parse(String[] args) throws ParseException {
 		Options options = new Options();
 
 		for (Option opt : opts) {
@@ -164,25 +231,38 @@ public class ArgParser {
 
 		cmd = new PosixParser().parse(options, args);
 
-		if (getCmd().hasOption("h")) {
+		if (cmd.hasOption('h') || cmd.hasOption("help")) {
 			printHelp(options, null);
 			System.exit(0);
 			return this;
 		}
 
+		String key;
 		for (Option opt : opts) {
-			if (!opt.hasArg) {
-				continue;
+			key = opt.opt;
+			if (key != null) {
+				if (cmd.hasOption(key)) {
+					if (opt.hasArg) {
+						optMap.put(key, cmd.getOptionValue(key));
+					} else {
+						optMap.put(key, true);
+					}
+				} else if (!optMap.containsKey(key)) {
+					optMap.put(key, opt.defaultArg);
+				}
 			}
-			String key = opt.opt;
-			if (key != null && getCmd().hasOption(key)) {
-				String value = getCmd().getOptionValue(key);
-				ConfigUtils.set(key, value);
-			}
+
 			key = opt.longOpt;
-			if (key != null && getCmd().hasOption(key)) {
-				String value = getCmd().getOptionValue(key);
-				ConfigUtils.set(key, value);
+			if (key != null) {
+				if (cmd.hasOption(key)) {
+					if (opt.hasArg) {
+						optMap.put(key, cmd.getOptionValue(key));
+					} else {
+						optMap.put(key, true);
+					}
+				} else if (!optMap.containsKey(key)) {
+					optMap.put(key, opt.defaultArg);
+				}
 			}
 		}
 
