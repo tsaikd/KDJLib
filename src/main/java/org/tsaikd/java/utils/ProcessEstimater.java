@@ -83,6 +83,9 @@ public class ProcessEstimater {
 	}
 
 	private long getRestTime() {
+		if (slot < 0) {
+			return -1;
+		}
 		int slotcmp = (slot + 1) % SLOT_SIZE;
 		long diffTime = timeList[slot] - timeList[slotcmp];
 		long diffNum = numList[slot] - numList[slotcmp];
@@ -94,6 +97,7 @@ public class ProcessEstimater {
 
 	public String getRestString() {
 		long rest = getRestTime();
+		rest = Math.max(rest, 0);
 
 		int msec = (int) (rest % 1000);
 		rest /= 1000;
@@ -143,12 +147,17 @@ public class ProcessEstimater {
 
 	@Override
 	public String toString() {
-		if (slot < 0) {
-			return String.format(outputFormat, getRestString(), 0, max, max, 0, 100);
+		long num, rest;
+		float curPercent, restPercent;
+		num = getNum();
+		rest = getRestNum();
+		if (max > 0) {
+			curPercent = (float) 100.0 * num / max;
+			restPercent = (float) 100.0 * rest / max;
+		} else {
+			curPercent = restPercent = 0;
 		}
-		long num = getNum();
-		long rest = getRestNum();
-		return String.format(outputFormat, getRestString(), num, rest, max, (float) 100.0 * num / max, (float) 100.0 * rest / max);
+		return String.format(outputFormat, getRestString(), num, rest, max, curPercent, restPercent);
 	}
 
 	private Date prevMsg = null;
