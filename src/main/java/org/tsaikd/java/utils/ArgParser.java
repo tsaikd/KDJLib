@@ -269,6 +269,39 @@ public class ArgParser {
 		return this;
 	}
 
+	public String getParsedMap() {
+		HashMap<String, Object> outmap = new HashMap<>();
+		String key;
+		for (Option opt : opts) {
+			key = opt.opt;
+			if (key != null) {
+				if (opt.hasArg) {
+					if (optMap.get(key) != opt.defaultArg) {
+						outmap.put(key, optMap.get(key));
+					}
+				} else {
+					if (optMap.get(key) == Boolean.TRUE) {
+						outmap.put(key, optMap.get(key));
+					}
+				}
+			}
+
+			key = opt.longOpt;
+			if (key != null) {
+				if (opt.hasArg) {
+					if (optMap.get(key) != opt.defaultArg) {
+						outmap.put(key, optMap.get(key));
+					}
+				} else {
+					if (optMap.get(key) == Boolean.TRUE) {
+						outmap.put(key, optMap.get(key));
+					}
+				}
+			}
+		}
+		return outmap.toString();
+	}
+
 	public void printHelp(Options options, String footer) {
 		HelpFormatter helpFmt = new HelpFormatter();
 		helpFmt.setWidth(getHelpWidth());
