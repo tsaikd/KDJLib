@@ -107,23 +107,23 @@ public class ArgParser {
 	}
 
 	public ArgParser() {
-		addOpt(new Option("h", "help", "Show help message"));
+		addOpt(new Option("h", "help", false, false, "Show help message"));
 		this.version = getPomVersion();
 	}
 
 	public ArgParser(String version) {
-		addOpt(new Option("h", "help", "Show help message"));
+		addOpt(new Option("h", "help", false, false, "Show help message"));
 		this.version = version;
 	}
 
 	public ArgParser(Class<?> optc) {
-		addOpt(new Option("h", "help", "Show help message"));
+		addOpt(new Option("h", "help", false, false, "Show help message"));
 		this.version = getPomVersion();
 		addOpt(optc);
 	}
 
 	public ArgParser(String version, Class<?> optc) {
-		addOpt(new Option("h", "help", "Show help message"));
+		addOpt(new Option("h", "help", false, false, "Show help message"));
 		this.version = version;
 		addOpt(optc);
 	}
@@ -222,7 +222,7 @@ public class ArgParser {
 		return null;
 	}
 
-	public ArgParser parse(String[] args) throws ParseException {
+	public ArgParser parse(String[] args, boolean writeConfigUtils) throws ParseException {
 		Options options = new Options();
 
 		for (Option opt : opts) {
@@ -250,6 +250,9 @@ public class ArgParser {
 				} else if (!optMap.containsKey(key)) {
 					optMap.put(key, opt.defaultArg);
 				}
+				if (writeConfigUtils) {
+					ConfigUtils.set(key, optMap.get(key).toString());
+				}
 			}
 
 			key = opt.longOpt;
@@ -263,10 +266,17 @@ public class ArgParser {
 				} else if (!optMap.containsKey(key)) {
 					optMap.put(key, opt.defaultArg);
 				}
+				if (writeConfigUtils) {
+					ConfigUtils.set(key, optMap.get(key).toString());
+				}
 			}
 		}
 
 		return this;
+	}
+
+	public ArgParser parse(String[] args) throws ParseException {
+		return parse(args, true);
 	}
 
 	public String getParsedMap() {

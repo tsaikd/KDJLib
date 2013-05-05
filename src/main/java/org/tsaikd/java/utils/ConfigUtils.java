@@ -280,6 +280,7 @@ public class ConfigUtils {
 		return is;
 	}
 
+	@SuppressWarnings("resource")
 	public static PropInfo getPropInfoByPath(String path, boolean quiet) {
 		PropInfo info = instance.new PropInfo();
 		InputStream is = null;
