@@ -315,7 +315,15 @@ public class ArgParser {
 	public void printHelp(Options options, String footer) {
 		HelpFormatter helpFmt = new HelpFormatter();
 		helpFmt.setWidth(getHelpWidth());
-		helpFmt.printHelp(ClassUtils.getClassName(false, 2), "Version: "
+
+		String appName = null;
+		for (int i=2 ; i<5 ; i++) {
+			appName = ClassUtils.getClassName(false, i);
+			if (!appName.equals(ArgParser.class.getSimpleName())) {
+				break;
+			}
+		}
+		helpFmt.printHelp(appName, "Version: "
 			+ version, options, footer, true);
 	}
 
