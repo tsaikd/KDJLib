@@ -323,8 +323,12 @@ public class ArgParser {
 				break;
 			}
 		}
-		helpFmt.printHelp(appName, "Version: "
-			+ version, options, footer, true);
+		if (version == null) {
+			helpFmt.printHelp(appName, null, options, footer, true);
+		} else {
+			helpFmt.printHelp(appName, "Version: "
+					+ version, options, footer, true);
+		}
 	}
 
 	public void printHelp(String footer) {
