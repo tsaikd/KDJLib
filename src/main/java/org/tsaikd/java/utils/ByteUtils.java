@@ -3,6 +3,7 @@ package org.tsaikd.java.utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+@Deprecated
 public class ByteUtils {
 
 	static Log log = LogFactory.getLog(ByteUtils.class);
