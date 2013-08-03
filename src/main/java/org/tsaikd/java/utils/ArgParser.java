@@ -219,7 +219,7 @@ public class ArgParser {
 		if (value != null) {
 			return Boolean.parseBoolean(value);
 		}
-		return null;
+		return false;
 	}
 
 	public ArgParser parse(String[] args, boolean writeConfigUtils) throws ParseException {
@@ -251,7 +251,7 @@ public class ArgParser {
 					optMap.put(key, opt.defaultArg);
 				}
 				if (writeConfigUtils) {
-					ConfigUtils.set(key, optMap.get(key).toString());
+					ConfigUtils.set(key, String.valueOf(optMap.get(key)));
 				}
 			}
 
@@ -267,7 +267,7 @@ public class ArgParser {
 					optMap.put(key, opt.defaultArg);
 				}
 				if (writeConfigUtils) {
-					ConfigUtils.set(key, optMap.get(key).toString());
+					ConfigUtils.set(key, String.valueOf(optMap.get(key)));
 				}
 			}
 		}

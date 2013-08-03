@@ -6,7 +6,7 @@
 		<version>RELEASE</version>
 	</parent>
 	<artifactId>KDJLib</artifactId>
-	<version>0.0.4</version>
+	<version>0.0.5</version>
 	<dependencies>
 		<dependency>
 			<groupId>commons-logging</groupId>
