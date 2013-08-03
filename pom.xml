@@ -3,25 +3,25 @@
 	<parent>
 		<groupId>org.tsaikd.java</groupId>
 		<artifactId>KDJLib_parent</artifactId>
-		<version>LATEST</version>
+		<version>RELEASE</version>
 	</parent>
 	<artifactId>KDJLib</artifactId>
-	<version>0.0.3-SNAPSHOT</version>
+	<version>0.0.4</version>
 	<dependencies>
 		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
-			<version>LATEST</version>
+			<version>RELEASE</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
-			<version>LATEST</version>
+			<version>RELEASE</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-cli</groupId>
 			<artifactId>commons-cli</artifactId>
-			<version>LATEST</version>
+			<version>RELEASE</version>
 		</dependency>
 	</dependencies>
 </project>
