@@ -16,11 +16,14 @@ dependencies {
 	compile 'commons-logging:commons-logging:1.2'
 	compile 'commons-codec:commons-codec:1.10'
 	compile 'commons-cli:commons-cli:1.2'
-	testCompile 'junit:junit:4.12'
 }
 
-configurations {
-	testCompile.exclude module: 'hamcrest-core'
+configurations.all {
+	// check for updates every build
+	resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+
+	// do not include transitive dependencies
+	transitive = false
 }
 
 test {
@@ -44,6 +47,7 @@ artifacts {
 uploadArchives {
 	repositories {
 		mavenDeployer {
+			pom.artifactId = 'KDJLib'
 			try {
 				repository(url: mavenReleaseUrl) {
 					authentication(userName: mavenDeployUser, password: mavenDeployPass)
