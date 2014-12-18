@@ -130,7 +130,6 @@ public class ProcessEstimater {
 	 *   default : "%1$s" <BR/>
 	 *   example : "%2$d / %4$d (%5$.2f%%) , Rest time: %1$s"
 	 * @param format
-	 * @return
 	 */
 	public ProcessEstimater setFormat(String format) {
 		this.outputFormat = format;
