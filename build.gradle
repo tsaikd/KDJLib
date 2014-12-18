@@ -14,9 +14,9 @@ repositories {
 
 dependencies {
 	compile 'commons-logging:commons-logging:1.2'
-	compile 'commons-codec:commons-codec:1.9'
+	compile 'commons-codec:commons-codec:1.10'
 	compile 'commons-cli:commons-cli:1.2'
-	testCompile 'junit:junit:4.11'
+	testCompile 'junit:junit:4.12'
 }
 
 configurations {
